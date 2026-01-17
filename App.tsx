@@ -1,13 +1,14 @@
-import { ScreenContent } from 'components/ScreenContent';
-import { StatusBar } from 'expo-status-bar';
-
-import './global.css';
+import "./global.css"
+import { View, Text } from 'react-native'
+import React from 'react'
+import { PaperProvider } from 'react-native-paper'
+import AppRadio from 'components/AppRadio'
+import { temaClaro } from 'themes/TemaClaro'
 
 export default function App() {
   return (
-    <>
-      <ScreenContent title="Home" path="App.tsx"></ScreenContent>
-      <StatusBar style="auto" />
-    </>
-  );
+    <PaperProvider theme={temaClaro}>
+      <AppRadio/>
+    </PaperProvider>
+  )
 }
