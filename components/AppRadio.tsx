@@ -1,15 +1,36 @@
 import { Alert, FlatList, Modal, StyleSheet, View } from 'react-native';
-import React, { useState } from 'react';
+import React, { use, useEffect, useState } from 'react';
 import { Emisora, Emisoras } from 'model/Types';
-import { Searchbar, Text } from 'react-native-paper';
+import { Icon, MD3Theme, Searchbar, Switch, Text } from 'react-native-paper';
 import { consultarEmisoras } from 'helpers/RadioAPI';
 import EmisoraCard from './EmisoraCard';
 import Reproductor from './Reproductor';
+import { temaClaro } from 'themes/TemaClaro';
+import { TemaOscuro } from 'themes/TemaOscuro';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-export default function AppRadio() {
+type AppRadioProps = {
+  tema: MD3Theme;
+  setTema: (tema: MD3Theme) => void;
+};
+
+export default function AppRadio({ tema, setTema }: AppRadioProps) {
   const [emisoras, setEmisoras] = useState<Emisoras>([]);
   const [accionBuscar, setAccionBuscar] = useState<string>('');
   const [emisoraSeleccionada, setEmisoraSeleccionada] = useState<Emisora | null>(null);
+
+  const [temaOscuroActivo, setTemaOscuroActivo] = useState<boolean>(false);
+
+  async function guardarTema(){
+    const tema = temaOscuroActivo ? 'oscuro' : 'claro';
+    await AsyncStorage.setItem('tema', tema);
+  }
+
+  useEffect(() => {
+    if(tema === TemaOscuro){
+      setTemaOscuroActivo(true);
+    };
+  }, [setTema]);
 
   function accionConsultarEmisoras(accionBuscar: string) {
     consultarEmisoras(accionBuscar)
@@ -21,8 +42,12 @@ export default function AppRadio() {
       });
   }
 
+  useEffect(() => {
+    temaOscuroActivo ? setTema(TemaOscuro) : setTema(temaClaro);
+  }, [temaOscuroActivo]);
+
   return (
-    <View className="justify-top flex-1 items-center px-4 pt-20">
+    <View className="justify-top flex-1 items-center px-4 pt-20" style={{ backgroundColor: tema.colors.background }}>
       <Text variant="titleLarge">Radios del Mundo</Text>
       <Searchbar
         value={accionBuscar}
@@ -49,6 +74,11 @@ export default function AppRadio() {
           />
         </Modal>
       )}
+      <View className="flex-row w-full justify-end items-center px-2 pb-4 self-end">
+        <Icon size={20} source={"weather-sunny"} color={tema.colors.onSurface} />
+        <Switch value={temaOscuroActivo} onValueChange={() => setTemaOscuroActivo(!temaOscuroActivo)} />
+        <Icon size={20} source={"weather-night"} color={tema.colors.onSurface} />
+      </View>
     </View>
   );
 }

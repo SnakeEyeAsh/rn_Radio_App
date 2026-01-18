@@ -1,8 +1,8 @@
-import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
-import React, { use, useEffect, useState } from 'react';
+import { Alert, Pressable, Text, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
 import { Emisora } from 'model/Types';
 import { Image } from 'expo-image';
-import { IconButton } from 'react-native-paper';
+import { IconButton, useTheme } from 'react-native-paper';
 import Slider from '@react-native-community/slider';
 import { Audio } from 'expo-av';
 import { useRef } from 'react';
@@ -13,24 +13,40 @@ type Props = {
 };
 
 export default function Reproductor({ emisora, setEmisora }: Props) {
+  const tema = useTheme();
   const radio = useRef<Audio.Sound>(new Audio.Sound());
   const [reproduciendo, setReproduciendo] = useState<boolean>(false);
   const [volumen, setVolumen] = useState<number>(1.0);
 
   async function reproducir() {
-    
     try {
-      await radio.current.loadAsync({ uri: emisora.url }, { shouldPlay: true });
+      const status = await radio.current.getStatusAsync();
+      if (status.isLoaded) {
+        await radio.current.playAsync();
+      } else {
+        await radio.current.loadAsync({ uri: emisora.url }, { shouldPlay: true });
+      }
       setReproduciendo(true);
     } catch (error) {
       Alert.alert('Error', 'No se pudo reproducir la emisora');
     }
   }
-  function detener() {
-    setReproduciendo(false);
+
+  async function detener() {
+    try {
+      await radio.current.pauseAsync();
+      setReproduciendo(false);
+    } catch (error) {
+      console.log('Error al pausar:', error);
+    }
   }
+
   function playPulsado() {
-    reproduciendo ? [setReproduciendo(false), detener] : [setReproduciendo(true), reproducir];
+    if (reproduciendo) {
+      detener();
+    } else {
+      reproducir();
+    }
   }
 
   useEffect(() => {
@@ -42,13 +58,13 @@ export default function Reproductor({ emisora, setEmisora }: Props) {
         className="flex-1"
         style={{ backgroundColor: 'rgba(0,0,0,0.4)' }}
         onPress={() => [detener(), setEmisora()]}>
-        <View className="absolute bottom-0 w-full rounded-t-lg bg-white p-4 ">
+        <View className="absolute bottom-0 w-full rounded-t-lg p-4" style={{ backgroundColor: tema.colors.elevation.level1 }}>
           <Image
             source={emisora.favicon ? { uri: emisora.favicon } : require('../assets/icono.jpg')}
             style={{ width: '100%', aspectRatio: 1 }}
           />
           <View className="flex-column items-center justify-center py-4">
-            <Text>{emisora.name}</Text>
+            <Text style={{ color: tema.colors.onSurface, fontSize: 18, fontWeight: 'bold' }}>{emisora.name}</Text>
             <View className="mb-2 flex-row items-center justify-center space-x-2">
               <Image
                 source={{
@@ -56,7 +72,7 @@ export default function Reproductor({ emisora, setEmisora }: Props) {
                 }}
                 style={{ width: 32, height: 32 }}
               />
-              <Text>{emisora.country}</Text>
+              <Text style={{ color: tema.colors.onSurfaceVariant }}>{emisora.country}</Text>
             </View>
             <IconButton
               icon={reproduciendo ? 'pause-circle' : 'play-circle'}
@@ -75,5 +91,3 @@ export default function Reproductor({ emisora, setEmisora }: Props) {
     </View>
   );
 }
-
-const styles = StyleSheet.create({});

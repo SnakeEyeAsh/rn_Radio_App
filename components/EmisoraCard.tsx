@@ -1,4 +1,4 @@
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable } from 'react-native';
 import React from 'react';
 import { Emisora } from 'model/Types';
 import { Avatar, Card, Chip } from 'react-native-paper';
@@ -10,8 +10,8 @@ type Props = {
 
 export default function EmisoraCard({ emisora, setEmisora }: Props) {
   return (
-    <Pressable onPress={setEmisora} className="m-2 ">
-      <Card>
+    <Pressable onPress={setEmisora} className="my-2 w-full">
+      <Card mode="elevated">
         <Card.Title
           title={emisora.name}
           subtitle={emisora.country + ' (' + emisora.language + ')'}
@@ -32,5 +32,3 @@ export default function EmisoraCard({ emisora, setEmisora }: Props) {
     </Pressable>
   );
 }
-
-const styles = StyleSheet.create({});
