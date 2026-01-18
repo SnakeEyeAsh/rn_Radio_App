@@ -11,7 +11,7 @@ export type Emisora={
 export type EmisoraAPI={
     stationuuid:string,
     name:string,
-    favicon:string|null,
+    favicon:string,
     tags:string|null,
     country:string,
     countrycode:string,
