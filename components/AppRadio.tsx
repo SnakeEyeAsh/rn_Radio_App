@@ -1,5 +1,5 @@
 import { Alert, FlatList, Modal, StyleSheet, View } from 'react-native';
-import React, { use, useEffect, useState } from 'react';
+import React, { use, useCallback, useEffect, useState } from 'react';
 import { Emisora, Emisoras } from 'model/Types';
 import { ActivityIndicator, Icon, MD3Theme, Searchbar, Switch, Text } from 'react-native-paper';
 import { consultarEmisoras } from 'helpers/RadioAPI';
@@ -24,6 +24,8 @@ export default function AppRadio({ tema, setTema }: AppRadioProps) {
   const [emisoraSeleccionada, setEmisoraSeleccionada] = useState<Emisora | null>(null);
 
   const [temaOscuroActivo, setTemaOscuroActivo] = useState<boolean>(false);
+
+  const renderItem = useCallback(({ item }:{item:Emisora}) => <EmisoraCard emisora={item} setEmisora={()=>setEmisoraSeleccionada(item)}/>, [emisoras]);
 
   async function guardarTema(){
     const tema = temaOscuroActivo ? 'oscuro' : 'claro';
@@ -76,9 +78,7 @@ export default function AppRadio({ tema, setTema }: AppRadioProps) {
         contentContainerStyle={{ paddingBottom: 40 }}
         data={emisoras}
         keyExtractor={(emisora) => emisora.stationuuid}
-        renderItem={({ item }) => (
-          <EmisoraCard emisora={item} setEmisora={() => setEmisoraSeleccionada(item)} />
-        )}
+        renderItem={renderItem}
         onEndReached={()=>accionConsultarEmisoras(accionBuscar)}
         onEndReachedThreshold={0.5}
         ListFooterComponent={cargando ? ActivityIndicator : null}

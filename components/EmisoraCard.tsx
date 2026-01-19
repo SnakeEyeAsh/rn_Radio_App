@@ -8,7 +8,7 @@ type Props = {
   setEmisora: () => void;
 };
 
-export default function EmisoraCard({ emisora, setEmisora }: Props) {
+const EmisoraCardLambda = ({ emisora, setEmisora }: Props) =>{
   return (
     <Pressable onPress={setEmisora} className="my-2 w-full">
       <Card mode="elevated">
@@ -32,3 +32,8 @@ export default function EmisoraCard({ emisora, setEmisora }: Props) {
     </Pressable>
   );
 }
+const EmisoraCard = React.memo(
+  EmisoraCardLambda,
+  (prevProps, nextProps) => prevProps.emisora.stationuuid === nextProps.emisora.stationuuid);
+
+export default EmisoraCard;
