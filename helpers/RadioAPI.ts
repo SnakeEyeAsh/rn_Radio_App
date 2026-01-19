@@ -7,12 +7,16 @@ export async function consultarEmisoras(emisora:string,offset:number,limit:numbe
 
     
     const urlCompleta = encodeURI(emisora);
-    const API_URL = `http://162.55.180.156/json/stations/byname/${urlCompleta}offset=${offset}/limit=${limit}`;
+    const API_URL = `http://162.55.180.156/json/stations/byname/${urlCompleta}`;
     const headers ={
         "User-Agent":"RadiosMundo/1.0"
     }
+    const params = {
+        offset: offset,
+        limit: limit
+    };
 
-    const response = await axios.get<EmisorasAPI>(API_URL,{headers});
+    const response = await axios.get<EmisorasAPI>(API_URL,{headers,params});
     const resultado = response.data;
 
     const emisorasTransformadas:Emisoras = resultado.map(emisoraAPI => ({
@@ -25,7 +29,7 @@ export async function consultarEmisoras(emisora:string,offset:number,limit:numbe
         language: emisoraAPI.language,
         url: emisoraAPI.url
     }));
-    
+   
     return emisorasTransformadas;
 
 }

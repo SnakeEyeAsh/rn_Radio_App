@@ -8,7 +8,7 @@ import Reproductor from './Reproductor';
 import { temaClaro } from 'themes/TemaClaro';
 import { TemaOscuro } from 'themes/TemaOscuro';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import R from 'types-ramda';
+import * as R from 'ramda';
 
 type AppRadioProps = {
   tema: MD3Theme;
@@ -48,14 +48,14 @@ export default function AppRadio({ tema, setTema }: AppRadioProps) {
   function accionConsultarEmisoras(accionBuscar: string) {
     consultarEmisoras(accionBuscar,offset,10)
       .then((data) => {
-        const nuevaLista = R.concat(data, emisoras);
+        const nuevaLista = [...emisoras,...data];
         setEmisoras(nuevaLista);
         setCargando(false);
         
         setOffset(offset + 10);
       })
       .catch((error) => {
-        Alert.alert('Error', 'No se pudieron consultar las emisoras');
+        Alert.alert('Error', 'No se pudieron consultar las emisoras'+error.message);
       });
   }
 
