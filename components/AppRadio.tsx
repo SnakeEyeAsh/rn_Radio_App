@@ -1,13 +1,14 @@
 import { Alert, FlatList, Modal, StyleSheet, View } from 'react-native';
 import React, { use, useEffect, useState } from 'react';
 import { Emisora, Emisoras } from 'model/Types';
-import { Icon, MD3Theme, Searchbar, Switch, Text } from 'react-native-paper';
+import { ActivityIndicator, Icon, MD3Theme, Searchbar, Switch, Text } from 'react-native-paper';
 import { consultarEmisoras } from 'helpers/RadioAPI';
 import EmisoraCard from './EmisoraCard';
 import Reproductor from './Reproductor';
 import { temaClaro } from 'themes/TemaClaro';
 import { TemaOscuro } from 'themes/TemaOscuro';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import R from 'types-ramda';
 
 type AppRadioProps = {
   tema: MD3Theme;
@@ -15,6 +16,9 @@ type AppRadioProps = {
 };
 
 export default function AppRadio({ tema, setTema }: AppRadioProps) {
+
+  const [offset, setOffset] = useState<number>(0);
+  const [cargando, setCargando] = useState<boolean>(false);
   const [emisoras, setEmisoras] = useState<Emisoras>([]);
   const [accionBuscar, setAccionBuscar] = useState<string>('');
   const [emisoraSeleccionada, setEmisoraSeleccionada] = useState<Emisora | null>(null);
@@ -26,6 +30,13 @@ export default function AppRadio({ tema, setTema }: AppRadioProps) {
     await AsyncStorage.setItem('tema', tema);
   }
 
+  function buscarEmisoras(){
+    setEmisoras([]);
+    setOffset(0);
+    accionConsultarEmisoras(accionBuscar);
+
+  }
+
   useEffect(() => {
     if(tema === TemaOscuro){
       setTemaOscuroActivo(true);
@@ -33,9 +44,13 @@ export default function AppRadio({ tema, setTema }: AppRadioProps) {
   }, [setTema]);
 
   function accionConsultarEmisoras(accionBuscar: string) {
-    consultarEmisoras(accionBuscar)
+    consultarEmisoras(accionBuscar,offset,10)
       .then((data) => {
-        setEmisoras(data);
+        const nuevaLista = R.concat(data, emisoras);
+        setEmisoras(nuevaLista);
+        setCargando(false);
+        
+        setOffset(offset + 10);
       })
       .catch((error) => {
         Alert.alert('Error', 'No se pudieron consultar las emisoras');
@@ -53,7 +68,7 @@ export default function AppRadio({ tema, setTema }: AppRadioProps) {
         value={accionBuscar}
         onChangeText={setAccionBuscar}
         icon={'magnify'}
-        onIconPress={() => accionConsultarEmisoras(accionBuscar)}
+        onIconPress={() => buscarEmisoras()}
       />
 
       <FlatList
@@ -64,6 +79,12 @@ export default function AppRadio({ tema, setTema }: AppRadioProps) {
         renderItem={({ item }) => (
           <EmisoraCard emisora={item} setEmisora={() => setEmisoraSeleccionada(item)} />
         )}
+        onEndReached={()=>accionConsultarEmisoras(accionBuscar)}
+        onEndReachedThreshold={0.5}
+        ListFooterComponent={cargando ? ActivityIndicator : null}
+        initialNumToRender={10}
+        maxToRenderPerBatch={10}
+
       />
 
       {emisoraSeleccionada && (

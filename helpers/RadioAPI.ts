@@ -3,11 +3,11 @@ import axios from "axios";
 
 
 
-export async function consultarEmisoras(emisora:string): Promise<Emisoras> {
+export async function consultarEmisoras(emisora:string,offset:number,limit:number): Promise<Emisoras> {
 
     
     const urlCompleta = encodeURI(emisora);
-    const API_URL = `http://162.55.180.156/json/stations/byname/${urlCompleta}`;
+    const API_URL = `http://162.55.180.156/json/stations/byname/${urlCompleta}offset=${offset}/limit=${limit}`;
     const headers ={
         "User-Agent":"RadiosMundo/1.0"
     }
